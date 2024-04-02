@@ -1,0 +1,6 @@
+node_modules
+.history
+.vs-code
+.prettierrc
+logs
+build
