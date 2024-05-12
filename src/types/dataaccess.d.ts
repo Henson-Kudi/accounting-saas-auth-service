@@ -1,6 +1,13 @@
-import mongoose, {mongo, UpdateQuery} from 'mongoose';
+import mongoose, {
+  FilterQuery,
+  mongo,
+  QueryOptions,
+  UpdateQuery,
+} from 'mongoose';
+import UserTokensSchema from '../entities/schemas/UserTokens.schema';
+import UserSchema from '../entities/schemas/User.schema';
 
-export default interface IDataAccess {
+export interface IUsersDb extends IUserTokensDb {
   findUsers(
     filter: FilterQuery<UserSchema>,
     projection?: ProjectionType<UserSchema>,
@@ -9,8 +16,8 @@ export default interface IDataAccess {
 
   createUsers(
     data:
-      | {[key: string]: any}
-      | {[key: string]: any}[]
+      | {[key: string]: unknown}
+      | {[key: string]: unknown}[]
       | UserSchema
       | UserSchema[]
   ): Promise<FlattenMaps<UserSchema> | FlattenMaps<UserSchema>[]>;
@@ -73,4 +80,30 @@ export default interface IDataAccess {
     newData: boolean = false,
     options?: mongo.UpdateOptions
   ): Promise<UserSchema[] | UpdateWriteOpResult>;
+}
+
+export interface IUserTokensDb {
+  createToken(
+    data:
+      | {[key: string]: unknown}
+      | {[key: string]: unknown}[]
+      | UserTokensSchema
+      | UserTokensSchema[]
+  ): Promise<UserTokensSchema | UserTokensSchema[]>;
+  findTokens(
+    filter: FilterQuery<UserTokensSchema>,
+    projection?: ProjectionType<UserTokensSchema>,
+    options?: QueryOptions<UserTokensSchema>
+  ): Promise<UserTokensSchema[]>;
+  findToken(
+    filter: FilterQuery<UserTokensSchema>,
+    projection?: ProjectionType<UserTokensSchema>,
+    options?: QueryOptions<UserTokensSchema>
+  ): Promise<UserTokensSchema | null>;
+  deleteTokens(filter: FilterQuery<UserTokensSchema>): Promise<boolean>;
+}
+
+export default interface IDataAccess {
+  UsersDb: IUsersDb;
+  UserTokensDB: IUserTokensDb;
 }

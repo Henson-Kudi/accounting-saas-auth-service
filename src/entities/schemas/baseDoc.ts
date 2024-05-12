@@ -2,6 +2,7 @@ import {modelOptions} from '@typegoose/typegoose';
 import {Base, TimeStamps} from '@typegoose/typegoose/lib/defaultClasses';
 import {Types} from 'mongoose';
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface BaseDocument extends Base {}
 
 @modelOptions({
@@ -15,7 +16,6 @@ interface BaseDocument extends Base {}
     },
   },
 })
-
 class BaseDocument extends TimeStamps {
   constructor() {
     super();

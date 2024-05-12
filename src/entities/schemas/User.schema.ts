@@ -20,15 +20,27 @@ class ContactSchema implements Contact {
 
 export default class UserSchema extends BaseDocument {
   constructor(
-    data: Pick<UserSchema, 'name' | 'email' | 'addresses' | 'contacts'> &
+    data: Pick<
+      UserSchema,
+      | 'name'
+      | 'email'
+      | 'addresses'
+      | 'contacts'
+      | 'lastLoginAt'
+      | 'lastLoginIp'
+      | 'lastLoginDevice'
+      | 'lastLoginLocation'
+      | 'googleId'
+      | 'appleId'
+      | 'picture'
+      | 'emailVerified'
+    > &
       Omit<UserSchema, '_id' | 'id' | 'updatedAt'>
   ) {
     super();
 
-    this.name = data.name;
-    this.email = data.email;
-    this.addresses = data.addresses;
-    this.contacts = data.contacts;
+    Object.assign(this, data);
+
     data.createdAt && (this.createdAt = data?.createdAt);
   }
 
@@ -60,15 +72,56 @@ export default class UserSchema extends BaseDocument {
   })
   public email!: string;
 
+  @prop({
+    required: true,
+    default: false,
+    select: false,
+  })
+  public emailVerified?: boolean;
+
+  @prop({required: true, type: String, select: false})
+  public passwordHash!: string;
+
   @prop({required: true, type: () => [AddressSchema]})
   public addresses!: AddressSchema[];
 
   @prop({required: true, type: () => [ContactSchema]})
   public contacts!: ContactSchema[];
 
+  @prop({required: true, default: new Date()})
+  public lastLoginAt!: Date;
+
+  @prop({required: false})
+  public lastLoginIp?: string;
+
+  @prop({required: false})
+  public lastLoginDevice?: string;
+
+  @prop({required: false})
+  public lastLoginLocation?: string;
+
+  @prop({required: false})
+  public googleId?: string;
+
+  @prop({required: false})
+  public appleId?: string;
+
+  @prop({required: false})
+  public picture?: string;
+
   @prop({required: false, default: true})
   public isActive?: boolean;
 
   @prop({required: false, default: false})
   public isDeleted?: boolean;
+
+  public comparePassword?(password: string): boolean {
+    // const isMatch = passwordService.comparePassword(
+    //   password,
+    //   this.passwordHash
+    // );
+    return true;
+  }
+
+  // When an owner invites a user, token is generated and if user accepts invitation, redirect to a page to fill required information like contact and addresses
 }

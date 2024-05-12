@@ -1,8 +1,10 @@
 import express from 'express';
 import morgan from 'morgan';
 import router from './routes';
+import repositoriesInjector from './middleware/repositoriesInjector';
+import environment from './utils/environment';
 
-const PORT = process.env.PORT || 5003;
+const PORT = environment.server.port;
 
 // This function will start our express app and inject database repositories. This will greately help for mocking our databases for tests
 const startServer = () => {
@@ -22,8 +24,8 @@ const startServer = () => {
     })
   );
 
-  // INJECT REPOSITORIES
-  // app.use(repositoriesInjector(database, services));
+  // INJECT REPOSITORIES AND SERVICES
+  app.use(repositoriesInjector);
 
   // INTITIALISE RESPONSEHANDLER
   // app.use(responseHandler);

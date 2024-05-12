@@ -4,3 +4,5 @@ node_modules
 .prettierrc
 logs
 build
+.env
+keys

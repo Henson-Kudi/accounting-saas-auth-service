@@ -8,45 +8,42 @@ import mongoose, {
 } from 'mongoose';
 import UserSchema from '../entities/schemas/User.schema';
 import {UserModel} from '../entities/models';
-import IDataAccess from '../types/dataaccess';
+import {IUsersDb} from '../types/dataaccess';
+import UserTokensDb from './usertokens.db';
 
-export default class UsersDb implements IDataAccess {
+export default class UsersDb extends UserTokensDb implements IUsersDb {
   async findUsers(
     filter: FilterQuery<UserSchema>,
     projection?: ProjectionType<UserSchema>,
     options?: QueryOptions<UserSchema>
   ): Promise<UserSchema[]> {
-    try {
-      const result = await UserModel.find(
-        filter,
-        projection,
-        options ?? {
-          sort: {createdAt: -1},
-        }
-      ).lean();
+    const result = await UserModel.find(
+      {
+        isActive: true,
+        isDeleted: false,
+        ...filter,
+      },
+      projection,
+      options ?? {
+        sort: {createdAt: -1},
+      }
+    ).lean();
 
-      return result;
-    } catch (error) {
-      throw error;
-    }
+    return result;
   }
 
   async createUsers(
     data:
-      | {[key: string]: any}
-      | {[key: string]: any}[]
+      | {[key: string]: unknown}
+      | {[key: string]: unknown}[]
       | UserSchema
       | UserSchema[]
-  ): Promise<any> {
-    try {
-      const created = await UserModel.create(data);
+  ): Promise<UserSchema | UserSchema[] | null> {
+    const created = await UserModel.create(data);
 
-      return Array.isArray(created)
-        ? created?.map(item => item?.toObject())
-        : created.toObject();
-    } catch (error) {
-      throw error;
-    }
+    return Array.isArray(created)
+      ? created?.map(item => item?.toObject())
+      : created.toObject();
   }
 
   async findOneUser(
@@ -54,13 +51,13 @@ export default class UsersDb implements IDataAccess {
     projection?: ProjectionType<UserSchema>,
     options?: QueryOptions<UserSchema>
   ): Promise<UserSchema | null> {
-    try {
-      const found = await UserModel.findOne(filter, projection, options);
+    const found = await UserModel.findOne(
+      {isActive: true, isDeleted: false, ...filter},
+      projection,
+      options
+    );
 
-      return found?.toObject() ?? null;
-    } catch (error) {
-      throw error;
-    }
+    return found?.toObject() ?? null;
   }
 
   async findUserById(
@@ -68,13 +65,9 @@ export default class UsersDb implements IDataAccess {
     projection?: ProjectionType<UserSchema>,
     options?: QueryOptions<UserSchema>
   ): Promise<UserSchema | null> {
-    try {
-      const found = await UserModel.findById(id, projection, options);
+    const found = await UserModel.findById(id, projection, options);
 
-      return found?.toObject() ?? null;
-    } catch (error) {
-      throw error;
-    }
+    return found?.toObject() ?? null;
   }
 
   async findUserByEmail(
@@ -82,19 +75,15 @@ export default class UsersDb implements IDataAccess {
     projection?: ProjectionType<UserSchema>,
     options?: QueryOptions<UserSchema>
   ): Promise<UserSchema | null> {
-    try {
-      const found = await UserModel.findOne(
-        {
-          email: email?.trim().toLowerCase(),
-        },
-        projection,
-        options
-      );
+    const found = await UserModel.findOne(
+      {
+        email: email?.trim().toLowerCase(),
+      },
+      projection,
+      options
+    );
 
-      return found?.toObject() ?? null;
-    } catch (error) {
-      throw error;
-    }
+    return found?.toObject() ?? null;
   }
 
   async updateOneUser(
@@ -113,16 +102,12 @@ export default class UsersDb implements IDataAccess {
     >,
     options?: QueryOptions<UserSchema>
   ): Promise<UserSchema | null> {
-    try {
-      const updated = await UserModel.findOneAndUpdate(filter, update, {
-        ...(options ?? {}),
-        new: options?.new === false ? false : true,
-      });
+    const updated = await UserModel.findOneAndUpdate(filter, update, {
+      ...(options ?? {}),
+      new: options?.new === false ? false : true,
+    });
 
-      return updated?.toObject() ?? null;
-    } catch (error) {
-      throw error;
-    }
+    return updated?.toObject() ?? null;
   }
 
   async findUserByIdAndUpdate(
@@ -141,16 +126,12 @@ export default class UsersDb implements IDataAccess {
     >,
     options?: QueryOptions<UserSchema>
   ): Promise<UserSchema | null> {
-    try {
-      const updated = await UserModel.findByIdAndUpdate(id, update, {
-        ...(options ?? {}),
-        new: options?.new === false ? false : true,
-      });
+    const updated = await UserModel.findByIdAndUpdate(id, update, {
+      ...(options ?? {}),
+      new: options?.new === false ? false : true,
+    });
 
-      return updated?.toObject() ?? null;
-    } catch (error) {
-      throw error;
-    }
+    return updated?.toObject() ?? null;
   }
 
   async updateManyUsers(
@@ -167,29 +148,25 @@ export default class UsersDb implements IDataAccess {
         | 'updatedAt'
       >
     >,
-    newData: boolean = false,
+    newData = false,
     options?: mongo.UpdateOptions
   ): Promise<UserSchema[] | UpdateWriteOpResult> {
-    try {
-      let found;
-      if (newData) {
-        found = await UserModel.find(filter).lean();
-      }
-
-      const updated = await UserModel.updateMany(filter, update, {
-        ...(options ?? {}),
-      });
-
-      if (newData) {
-        const updateData = await UserModel.find({
-          _id: {$in: found?.map(item => item?._id)},
-        }).lean();
-        return updateData;
-      }
-
-      return updated;
-    } catch (error) {
-      throw error;
+    let found;
+    if (newData) {
+      found = await UserModel.find(filter).lean();
     }
+
+    const updated = await UserModel.updateMany(filter, update, {
+      ...(options ?? {}),
+    });
+
+    if (newData) {
+      const updateData = await UserModel.find({
+        _id: {$in: found?.map(item => item?._id)},
+      }).lean();
+      return updateData;
+    }
+
+    return updated;
   }
 }
