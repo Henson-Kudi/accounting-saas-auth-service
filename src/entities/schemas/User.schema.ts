@@ -34,6 +34,7 @@ export default class UserSchema extends BaseDocument {
       | 'appleId'
       | 'picture'
       | 'emailVerified'
+      | 'passwordHash'
     > &
       Omit<UserSchema, '_id' | 'id' | 'updatedAt'>
   ) {
@@ -66,8 +67,7 @@ export default class UserSchema extends BaseDocument {
         const {error} = emailValidator.validate(value);
         return !error;
       },
-      message: (props: any) =>
-        props?.reason?.message ?? 'Invalid email address',
+      message: () => 'Invalid email address',
     },
   })
   public email!: string;
@@ -115,13 +115,13 @@ export default class UserSchema extends BaseDocument {
   @prop({required: false, default: false})
   public isDeleted?: boolean;
 
-  public comparePassword?(password: string): boolean {
-    // const isMatch = passwordService.comparePassword(
-    //   password,
-    //   this.passwordHash
-    // );
-    return true;
-  }
+  // public comparePassword?(password: string): boolean {
+  //   // const isMatch = passwordService.comparePassword(
+  //   //   password,
+  //   //   this.passwordHash
+  //   // );
+  //   return true;
+  // }
 
   // When an owner invites a user, token is generated and if user accepts invitation, redirect to a page to fill required information like contact and addresses
 }

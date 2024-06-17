@@ -14,6 +14,12 @@
     "skipLibCheck": true,
     "types": ["./src/types/express/index.d.ts", "jest"]
   },
-  "include": ["index.ts", "src/**/*.ts", "test/**/*.ts"],
-  "exclude": ["node_modules", "**/*.spec.ts", ".history"]
+  "include": ["index.ts", "src/**/*.ts", "tests/**/*.ts"],
+  "exclude": [
+    "node_modules",
+    "**/*.spec.ts",
+    ".history",
+    "tests",
+    "**/__mocks__"
+  ]
 }

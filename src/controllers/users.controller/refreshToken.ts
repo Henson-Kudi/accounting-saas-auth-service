@@ -1,17 +1,12 @@
 import {Request, Response} from 'express';
 import ResponseMessage, {
-  BadRequestMessage,
   ForbiddenMessage,
   SuccessMessage,
   UnhandledErrorMessage,
 } from '../../utils/responseHandler/responseMessage';
 import responseHandler from '../../utils/responseHandler';
-import {
-  ACCESS_TOKEN_OPTIONS,
-  REFRESH_TOKEN_OPTIONS,
-} from '../../utils/constants';
+import {REFRESH_TOKEN_OPTIONS} from '../../utils/constants';
 import moment from 'moment';
-import {Types} from 'mongoose';
 export default async function refreshToken(
   req: Request,
   res: Response

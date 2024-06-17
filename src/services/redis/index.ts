@@ -1,5 +1,5 @@
-import {redisClient} from '../configs/redis';
-import IRedisService from '../types/services/redisService';
+import {redisClient} from '../../configs/redis';
+import IRedisService from '../../types/services/redisService';
 
 const redisService: IRedisService = {
   async getItem(filter) {

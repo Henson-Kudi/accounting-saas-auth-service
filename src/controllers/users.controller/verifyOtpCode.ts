@@ -1,12 +1,12 @@
-import {Request, Response} from 'express';
+import { Request, Response } from 'express';
 import moment from 'moment';
-import {
+import ResponseMessage, {
   BadRequestMessage,
   SuccessMessage,
   UnhandledErrorMessage,
 } from '../../utils/responseHandler/responseMessage';
 import UserSchema from '../../entities/schemas/User.schema';
-import {REFRESH_TOKEN_OPTIONS} from '../../utils/constants';
+import { REFRESH_TOKEN_OPTIONS } from '../../utils/constants';
 import responseHandler from '../../utils/responseHandler';
 
 export default async function verifyOtpCode(
@@ -24,7 +24,7 @@ export default async function verifyOtpCode(
     const lastLoginLocation = req.headers['geo-location']!;
     const lastLoginAt = moment().toDate();
 
-    const {usersRepository} = req.repositories!;
+    const { usersRepository } = req.repositories!;
 
     const otpData = {
       ...data,
@@ -34,13 +34,16 @@ export default async function verifyOtpCode(
       lastLoginAt,
     };
 
+    console.log(otpData, 'otp data')
+
     const otpUser: {
       accessToken: string;
       refreshToken: string;
       user: UserSchema;
-    } | null = await usersRepository.verifyOtpCode(otpData);
+    } | null = await usersRepository!.verifyOtpCode(otpData);
 
     if (!otpUser) {
+      console.log(otpUser, 'otp user')
       throw new BadRequestMessage('Invalid');
     }
 
@@ -73,7 +76,8 @@ export default async function verifyOtpCode(
 
     // res.set
   } catch (err: any) {
-    if (err instanceof SuccessMessage) {
+    console.log(err)
+    if (err instanceof ResponseMessage) {
       return responseHandler(res, err);
     }
 

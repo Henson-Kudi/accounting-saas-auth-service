@@ -1,6 +1,6 @@
 import Jwt from 'jsonwebtoken';
-import JWTService from '../types/services/JWTService';
-import UserSchema from '../entities/schemas/User.schema';
+import JWTService from '../../types/services/JWTService';
+import UserSchema from '../../entities/schemas/User.schema';
 
 const jwtService: JWTService = {
   generateJWtToken: (

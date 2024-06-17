@@ -6,3 +6,5 @@ logs
 build
 .env
 keys
+testing
+coverage

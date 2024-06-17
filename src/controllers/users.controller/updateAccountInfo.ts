@@ -1,6 +1,5 @@
 import {Request, Response} from 'express';
 import ResponseMessage, {
-  BadRequestMessage,
   ForbiddenMessage,
   NotFoundMessage,
   SuccessMessage,
@@ -9,7 +8,6 @@ import ResponseMessage, {
 } from '../../utils/responseHandler/responseMessage';
 import responseHandler from '../../utils/responseHandler';
 import {Types} from 'mongoose';
-import moment from 'moment';
 import Joi from '@hapi/joi';
 import {updateSchema} from '../../utils/validators/user.validator';
 export default async function updateAccountInfo(
@@ -19,7 +17,6 @@ export default async function updateAccountInfo(
   try {
     const data = req.body;
     const {usersRepository} = req.repositories!;
-    const now = moment().toDate();
 
     const user = req.user;
 

@@ -48,6 +48,19 @@ export default async function attemptLogin(
         {email: data.email.toString(), password: data.password.toString()},
         db
       );
+
+      if (!loggedInUser) {
+        return null;
+      }
+
+      if (
+        !(await services.passwordService.verify(
+          data.password?.toString(),
+          loggedInUser.passwordHash
+        ))
+      ) {
+        return null;
+      }
       break;
   }
 
@@ -55,6 +68,8 @@ export default async function attemptLogin(
   if (!loggedInUser) {
     return null;
   }
+
+  // Ensure Passwords match before logging in
 
   const {jwtService} = services;
 

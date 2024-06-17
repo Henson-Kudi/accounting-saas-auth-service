@@ -1,10 +1,6 @@
-import {Request, Response, NextFunction} from 'express';
-import {UnauthorizedMessage} from '../utils/responseHandler/responseMessage';
-import {JwtPayload} from 'jsonwebtoken';
-import {Types} from 'mongoose';
-import humanInterval from 'human-interval';
-import environment from '../utils/environment';
-import UserSchema from '../entities/schemas/User.schema';
+import { Request, Response, NextFunction } from 'express';
+import { UnauthorizedMessage } from '../utils/responseHandler/responseMessage';
+import authenticateUser from '../uses-cases/auth/authenticateUser';
 
 export default async function authenticateMiddleware(
   req: Request,
@@ -18,107 +14,7 @@ export default async function authenticateMiddleware(
       throw new UnauthorizedMessage('Invalid token');
     }
 
-    const authToken = token.split(' ')[1];
-
-    if (!authToken) {
-      throw new UnauthorizedMessage('Invalid token');
-    }
-
-    const {jwtService, redisService} = req.services!;
-
-    const {usersRepository} = req.repositories!;
-
-    const decodedToken = jwtService.decodeToken(authToken);
-
-    if (!decodedToken) {
-      throw new UnauthorizedMessage('Invalid token');
-    }
-    // Ensure that decodedToken has:
-    // -issuer, -keyid, -audience
-    // expiry is not more than 20mins
-    const payload = decodedToken.payload;
-
-    const headers = decodedToken.header;
-
-    if (
-      !payload ||
-      typeof payload === 'string' ||
-      !payload.iss ||
-      // !payload?.userId ||
-      !payload.aud ||
-      !payload.exp ||
-      !payload.iat
-    ) {
-      throw new UnauthorizedMessage('Invalid token');
-    }
-
-    if (!headers.kid || headers.alg !== 'RS256' || headers.typ !== 'JWT') {
-      throw new UnauthorizedMessage('Invalid token');
-    }
-
-    // Throw error if token is valid for more than 20 minutes
-    const _20mins = humanInterval('20 minutes')! / 1000; //20 minutes in seconds
-
-    if (payload.exp - payload.iat > _20mins) {
-      throw new UnauthorizedMessage('Token cannot be more than 20 minutes');
-    }
-
-    let verifiedPayload: JwtPayload | undefined;
-
-    let foundUser: UserSchema | null = null;
-
-    // if decodedToken's issuer is our local sytem, then use environment.accessKey, else fetch key from redis key-store
-    if (payload.iss === environment.jwt.accessKey.name) {
-      const user = await usersRepository.findUserById(
-        Types.ObjectId.createFromHexString(payload.userId)
-      );
-
-      foundUser = user;
-
-      verifiedPayload = jwtService.verifyToken(
-        authToken,
-        environment.jwt.accessKey.publicKey
-      );
-    } else {
-      const result = await redisService.getItem(headers.kid);
-
-      if (!result) {
-        throw new UnauthorizedMessage('Invalid token');
-      }
-
-      const jsonData = JSON.parse(result);
-
-      if (!jsonData.owner || !jsonData.key) {
-        throw new UnauthorizedMessage('Invalid token');
-      }
-
-      const foundOwner = await usersRepository.findUserById(
-        Types.ObjectId.createFromHexString(jsonData.owner)
-      );
-
-      foundUser = foundOwner;
-
-      verifiedPayload = jwtService.verifyToken(authToken, jsonData.key);
-    }
-
-    if (!verifiedPayload || !foundUser) {
-      throw new UnauthorizedMessage('Invalid token');
-    }
-
-    // if foundUser is not active, throw error
-    if (!foundUser.isActive) {
-      throw new UnauthorizedMessage('User is not active');
-    }
-
-    // if foundUser is not active, throw error
-    if (foundUser.isDeleted) {
-      throw new UnauthorizedMessage('Invalid token');
-    }
-
-    // if foundUser is not verified, throw error
-    if (!foundUser.emailVerified) {
-      throw new UnauthorizedMessage('Please  verify your email');
-    }
+    const foundUser = await authenticateUser(token, req.repositories!);
 
     req.user = foundUser;
     next();

@@ -7,11 +7,10 @@ import mongoose, {
   UpdateWriteOpResult,
 } from 'mongoose';
 import UserSchema from '../entities/schemas/User.schema';
-import {UserModel} from '../entities/models';
-import {IUsersDb} from '../types/dataaccess';
+import { UserModel } from '../entities/models';
+import { IUsersDb } from '../types/dataaccess';
 import UserTokensDb from './usertokens.db';
-
-export default class UsersDb extends UserTokensDb implements IUsersDb {
+class UsersDb extends UserTokensDb implements IUsersDb {
   async findUsers(
     filter: FilterQuery<UserSchema>,
     projection?: ProjectionType<UserSchema>,
@@ -25,7 +24,7 @@ export default class UsersDb extends UserTokensDb implements IUsersDb {
       },
       projection,
       options ?? {
-        sort: {createdAt: -1},
+        sort: { createdAt: -1 },
       }
     ).lean();
 
@@ -33,17 +32,11 @@ export default class UsersDb extends UserTokensDb implements IUsersDb {
   }
 
   async createUsers(
-    data:
-      | {[key: string]: unknown}
-      | {[key: string]: unknown}[]
-      | UserSchema
-      | UserSchema[]
-  ): Promise<UserSchema | UserSchema[] | null> {
+    data: { [key: string]: unknown } | UserSchema
+  ): Promise<UserSchema> {
     const created = await UserModel.create(data);
 
-    return Array.isArray(created)
-      ? created?.map(item => item?.toObject())
-      : created.toObject();
+    return created.toObject();
   }
 
   async findOneUser(
@@ -52,7 +45,7 @@ export default class UsersDb extends UserTokensDb implements IUsersDb {
     options?: QueryOptions<UserSchema>
   ): Promise<UserSchema | null> {
     const found = await UserModel.findOne(
-      {isActive: true, isDeleted: false, ...filter},
+      { isActive: true, isDeleted: false, ...filter },
       projection,
       options
     );
@@ -162,7 +155,7 @@ export default class UsersDb extends UserTokensDb implements IUsersDb {
 
     if (newData) {
       const updateData = await UserModel.find({
-        _id: {$in: found?.map(item => item?._id)},
+        _id: { $in: found?.map(item => item?._id) },
       }).lean();
       return updateData;
     }
@@ -170,3 +163,5 @@ export default class UsersDb extends UserTokensDb implements IUsersDb {
     return updated;
   }
 }
+
+export default UsersDb

@@ -1,8 +1,8 @@
-import {isValidObjectId, Types} from 'mongoose';
+import { isValidObjectId, Types } from 'mongoose';
 import UserSchema from '../../entities/schemas/User.schema';
-import {IUsersDb} from '../../types/dataaccess';
+import { IUsersDb } from '../../types/dataaccess';
 import environment from '../../utils/environment';
-import {UnhandledErrorMessage} from '../../utils/responseHandler/responseMessage';
+import { UnhandledErrorMessage } from '../../utils/responseHandler/responseMessage';
 import IServices from '../../types/services';
 import moment from 'moment';
 import {
@@ -22,7 +22,7 @@ export default async function verifyOtpCode(
   user: UserSchema;
 } | null> {
   let user: UserSchema | null = null;
-  const {jwtService, emailService} = services;
+  const { jwtService, emailService } = services;
 
   if (
     !data.otpCode ||
@@ -66,7 +66,7 @@ export default async function verifyOtpCode(
   }
 
   // till this level then otp is valid. So delete token from db to ensure it is used just once
-  await db.deleteTokens({_id: foundCode._id});
+  await db.deleteTokens({ _id: foundCode._id });
 
   // Get private key from aws service
   const accessKey = environment.jwt.accessKey;
@@ -120,14 +120,14 @@ export default async function verifyOtpCode(
 
   // delete any tokens in db for this device
   await db.deleteTokens({
-    type: {$in: ['REFRESH_TOKEN', 'ACCESS_TOKEN']},
+    type: { $in: ['REFRESH_TOKEN', 'ACCESS_TOKEN'] },
     userId: user._id ?? Types.ObjectId.createFromHexString(user.id),
     deviceIp: data.lastLoginIp,
     deviceName: data.lastLoginDevice,
   });
 
   // Save new tokens to db
-  const tokens: {[key: string]: unknown}[] = [
+  const tokens: { [key: string]: unknown }[] = [
     {
       expireAt: refreshTokenExpiryDate,
       token: refreshToken,

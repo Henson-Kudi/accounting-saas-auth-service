@@ -1,14 +1,14 @@
 import {Request, Response, NextFunction} from 'express';
-import repositories from '../uses-cases';
-import services from '../services';
+import RepositoryLocator from '../types/RepositoryLocator';
+import IServices from '../types/services';
 
-export default function repositoriesInjector(
-  req: Request,
-  res: Response,
-  next: NextFunction
-) {
-  req.repositories = repositories;
-  req.services = services;
-  console.log('Repository intjected');
-  next();
-}
+export default (
+    repositories: RepositoryLocator,
+    services: IServices
+  ): ((req: Request, res: Response, next: NextFunction) => void) =>
+  (req: Request, res: Response, next: NextFunction) => {
+    req.repositories = repositories;
+    req.services = services;
+    // console.log('Repository intjected');
+    next();
+  };

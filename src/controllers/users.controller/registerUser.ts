@@ -1,15 +1,17 @@
-import {Request, Response} from 'express';
+import { Request, Response } from 'express';
 import responseHandler from '../../utils/responseHandler';
 import ResponseMessage, {
   BadRequestMessage,
   SuccessMessage,
   UnhandledErrorMessage,
+  ValidationMessage,
 } from '../../utils/responseHandler/responseMessage';
 import generateRandomNumber from '../../utils/randomNumber';
 import moment from 'moment';
 import UserSchema from '../../entities/schemas/User.schema';
-import {Types} from 'mongoose';
+import { Types } from 'mongoose';
 import environment from '../../utils/environment';
+import Joi from '@hapi/joi';
 
 export default async function registerUser(
   req: Request,
@@ -26,8 +28,8 @@ export default async function registerUser(
     }
 
     // Setup repository
-    const {usersRepository} = req.repositories!;
-    const {emailService} = req.services!;
+    const { usersRepository } = req.repositories!;
+    const { emailService } = req.services!;
 
     // Register user
     const user = (await usersRepository!.registerUser({
@@ -77,6 +79,9 @@ export default async function registerUser(
       new SuccessMessage(user!, 'User registered successfully', 202)
     );
   } catch (err: any) {
+    if (Joi.isError(err)) {
+      return responseHandler(res, new ValidationMessage(err.details));
+    }
     // Handle error response from repository
     if (err instanceof ResponseMessage) {
       return responseHandler(res, err);

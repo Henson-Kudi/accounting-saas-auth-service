@@ -6,42 +6,46 @@ import ResponseMessage, {
   UnhandledErrorMessage,
   ValidationMessage,
 } from '../../utils/responseHandler/responseMessage';
+import IServices from '../../types/services';
+import { AUTHENTICATION_EXCHANGE } from '../../utils/constants/rabbitMqQueues.json';
 
 export default async function registerUser(
   db: IUsersDb,
-  data:
-    | {[key: string]: unknown}
-    | {[key: string]: unknown}[]
-    | UserSchema
-    | UserSchema[]
-): Promise<UserSchema | UserSchema[]> {
+  data: {[key: string]: unknown},
+  services: IServices
+): Promise<UserSchema> {
   try {
     const {createUsers} = db;
     // Validate data with joi schema
-    const validator = Array.isArray(data)
-      ? Joi.array().items(userValidator)
-      : userValidator;
 
-    await validator.validateAsync(data, {abortEarly: false});
-
-    const emails = Array.isArray(data)
-      ? data?.map(item => (item?.email as string)?.trim()?.toLowerCase())
-      : [(data.email as string).trim().toLowerCase()];
+    await userValidator.validateAsync(data, {abortEarly: false});
 
     // Check if user with email already exists
     const foundUser = await db.findOneUser({
-      email: {
-        $in: emails,
-      },
+      email: (data?.email as string)?.toLowerCase(),
     });
 
     if (foundUser) {
-      throw new ValidationMessage(new Error('User(s) already exist'));
+      throw new ValidationMessage(
+        new Error(`User with email: ${data.email} already exist`)
+      );
     }
+    // Hash password before creating user
+    data.passwordHash = await services.passwordService.encrypt(
+      data.password as string
+    );
 
-    const createdUsers = await createUsers(data);
-    // Emit rabbitMQ event if necessary
-    return createdUsers;
+    const createdUser = await createUsers(data);
+
+    // publish user created message to rabbitMq
+    await services.rabbitMqService.publishMessage({
+      exchange: AUTHENTICATION_EXCHANGE.name,
+      routeKey: AUTHENTICATION_EXCHANGE.routeKeys.accountCreated,
+      exchangeType: 'topic',
+      task: Buffer.from(JSON.stringify(createdUser)),
+    });
+
+    return createdUser;
   } catch (err: any) {
     // Case of Joi error
     if (Joi.isError(err)) {

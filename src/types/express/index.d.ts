@@ -1,5 +1,5 @@
-import {Response as ExpressResponse, Request as ExpressRequest} from 'express';
-import winston from 'winston';
+import {Request as ExpressRequest} from 'express';
+// import winston from 'winston';
 import RepositoryLocator from '../RepositoryLocator';
 import IServices from '../services';
 import UserSchema from '../../entities/schemas/User.schema';

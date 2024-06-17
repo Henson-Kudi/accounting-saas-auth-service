@@ -10,16 +10,19 @@ export interface IUsersRepository {
       | UserSchema
       | UserSchema[]
   ): Promise<UserSchema | UserSchema[]>;
+
   verifyOtpCode(data: {[key: string]: unknown}): Promise<{
     accessToken: string;
     refreshToken: string;
     user: UserSchema;
   } | null>;
+
   attemptLogin(data: unknown): Promise<{
     accessToken: string;
     refreshToken: string;
     user: UserSchema;
   } | null>;
+
   refreshToken(payload: {[key: string]: unknown} & {token: string}): Promise<{
     accessToken: string;
     refreshToken: string;

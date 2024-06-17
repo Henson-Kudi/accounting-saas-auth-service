@@ -20,6 +20,7 @@ class BaseDocument extends TimeStamps {
   constructor() {
     super();
     this._id = new Types.ObjectId();
+    this.id = this._id.toString();
   }
 }
 

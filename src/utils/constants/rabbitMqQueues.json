@@ -1,0 +1,16 @@
+{
+  "DEAD_LETTER": {
+    "name": "DEAD_LETTER-EXCHANGE"
+  },
+  "AUTHENTICATION_EXCHANGE": {
+    "name": "authentication-exchange",
+    "routeKeys": {
+      "accountCreated": "account.created",
+      "accountUpdated": "account.updated",
+      "accountDeleted": "account.deleted"
+    }
+  },
+  "AUTH_QUEUES": {
+    "authenticateJwt": "authenticate-jwt"
+  }
+}

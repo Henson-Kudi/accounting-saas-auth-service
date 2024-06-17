@@ -1,3 +1,4 @@
 build/
 .history
 .vs-code
+./test/*

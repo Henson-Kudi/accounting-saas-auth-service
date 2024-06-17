@@ -22,7 +22,7 @@ export default {
   smtp: {
     user: process.env.SMTP_USER,
     pass: process.env.SMTP_PASS,
-    noReply: process.env.SMTP_NO_REPLY,
+    noReply: process.env.SMTP_NO_REPLY || 'noteply@email.com',
   },
   google: {
     oauthClientId: process.env.GOOGLE_CLIENT_ID,
@@ -30,5 +30,8 @@ export default {
   },
   redis: {
     url: process.env.REDIS_URL,
+  },
+  rabbitMq: {
+    connectionUrl: process.env.AMQP_URL,
   },
 };

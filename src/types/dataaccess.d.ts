@@ -15,12 +15,8 @@ export interface IUsersDb extends IUserTokensDb {
   ): Promise<UserSchema[]>;
 
   createUsers(
-    data:
-      | {[key: string]: unknown}
-      | {[key: string]: unknown}[]
-      | UserSchema
-      | UserSchema[]
-  ): Promise<FlattenMaps<UserSchema> | FlattenMaps<UserSchema>[]>;
+    data: { [key: string]: unknown } | UserSchema
+  ): Promise<FlattenMaps<UserSchema>>;
 
   findOneUser(
     filter: FilterQuery<UserSchema>,
@@ -85,8 +81,8 @@ export interface IUsersDb extends IUserTokensDb {
 export interface IUserTokensDb {
   createToken(
     data:
-      | {[key: string]: unknown}
-      | {[key: string]: unknown}[]
+      | { [key: string]: unknown }
+      | { [key: string]: unknown }[]
       | UserTokensSchema
       | UserTokensSchema[]
   ): Promise<UserTokensSchema | UserTokensSchema[]>;
@@ -103,7 +99,4 @@ export interface IUserTokensDb {
   deleteTokens(filter: FilterQuery<UserTokensSchema>): Promise<boolean>;
 }
 
-export default interface IDataAccess {
-  UsersDb: IUsersDb;
-  UserTokensDB: IUserTokensDb;
-}
+

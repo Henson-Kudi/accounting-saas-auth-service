@@ -24,11 +24,5 @@ export default async function attemptNormalLogin(
     throw new BadRequestMessage('Please login with your social account');
   }
 
-  const isMatch = await user.comparePassword!(data.password);
-
-  if (!isMatch) {
-    return null;
-  }
-
   return user;
 }
